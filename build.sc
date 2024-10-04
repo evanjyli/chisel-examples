@@ -7,7 +7,7 @@ import scalalib._
 // support BSP
 import mill.bsp._
 
-object chisel-examples extends SbtModule { m =>
+object chisel_examples extends SbtModule { m =>
   override def millSourcePath = os.pwd
   override def scalaVersion = "2.13.12"
   override def scalacOptions = Seq(
