@@ -78,7 +78,7 @@ class Cache(
   val writeBackData = Reg(UInt(dataWidth.W))
 
   // Read the tag
-  val storedTag = tagMem.read(reqIndex, state === s_idle)
+  val storedTag = tagMem.read(reqIndex, state === s_idle || state === s_wait)
   val hit = (storedTag === reqTag) && (storedTag =/= 0.U) // Assuming tag 0.U is invalid
 
   // Connect dataMem

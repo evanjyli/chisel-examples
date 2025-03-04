@@ -5,6 +5,7 @@ package gcd
 import chisel3._
 // _root_ disambiguates from package chisel3.util.circt if user imports chisel3.util._
 import _root_.circt.stage.ChiselStage
+import java.io.PrintWriter
 
 /**
   * Compute GCD using subtraction method.
@@ -43,4 +44,11 @@ object GCD extends App {
     new GCD,
     firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info")
   )
+
+  val chirrtl = ChiselStage.emitCHIRRTL(
+    new GCD 
+  )
+  val fileWriter = new PrintWriter("GCD.fir")
+  fileWriter.write(chirrtl)
+  fileWriter.close()
 }
