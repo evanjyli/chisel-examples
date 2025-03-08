@@ -1,9 +1,8 @@
-package gcd
+package sram
 
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
-
 import java.io.PrintWriter
 
 
@@ -26,22 +25,6 @@ class OneReadOneWritePortSRAM(width: Int) extends Module {
   io.rdata := mem.read(io.raddr, io.ren)
 }
 
-object OneReadOneWritePortSRAM extends App {
-// ChiselStage.emitSystemVerilogFile(
-// new OneReadOneWritePortSRAM(2),
-// firtoolOpts = Array(
-// "-disable-all-randomization",
-// "-strip-debug-info",
-// "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
-
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new OneReadOneWritePortSRAM(2)
-  )
-  val fileWriter = new PrintWriter("OneReadOneWritePortSRAM.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
-
-}
 
 class SinglePortSRAM(width: Int) extends Module {
   val io = IO(new Bundle {
@@ -63,11 +46,32 @@ class SinglePortSRAM(width: Int) extends Module {
 }
 
 
-object SinglePortSRAM extends App {
+object SRAM extends App {
   ChiselStage.emitSystemVerilogFile(
     new SinglePortSRAM(2),
     firtoolOpts = Array(
       "-disable-all-randomization",
       "-strip-debug-info",
       "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
+
+  val chirrtl = ChiselStage.emitCHIRRTL(
+    new SinglePortSRAM(2)
+  )
+  val fileWriter = new PrintWriter("SinglePortSRAM.fir")
+  fileWriter.write(chirrtl)
+  fileWriter.close()
+
+  ChiselStage.emitSystemVerilogFile(
+    new OneReadOneWritePortSRAM(2),
+    firtoolOpts = Array(
+      "-disable-all-randomization",
+      "-strip-debug-info",
+      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
+
+  val chirrtl2 = ChiselStage.emitCHIRRTL(
+    new OneReadOneWritePortSRAM(2)
+  )
+  val fileWriter2 = new PrintWriter("OneReadOneWritePortSRAM.fir")
+  fileWriter2.write(chirrtl2)
+  fileWriter2.close()
 }

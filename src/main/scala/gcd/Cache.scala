@@ -1,6 +1,9 @@
+package cache
+
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
+import java.io.PrintWriter
 
 class SRAM(val depth: Int, val width: Int) extends Module {
   val addrWidth = log2Ceil(depth)
@@ -151,4 +154,14 @@ object Cache extends App {
       "-disable-all-randomization",
       "-strip-debug-info",
       "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
+}
+
+object CacheCHIRRTL extends App {
+  val chirrtl = ChiselStage.emitCHIRRTL(
+    new Cache, args
+  )
+
+  val fileWriter = new PrintWriter("Cache.fir")
+  fileWriter.write(chirrtl)
+  fileWriter.close()
 }

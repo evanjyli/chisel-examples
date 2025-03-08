@@ -1,7 +1,8 @@
-package gcd
+package fir
 
 import chisel3._
 import _root_.circt.stage.ChiselStage
+import java.io.PrintWriter
 
 class Fir(length: Int) extends Module {
   val io = IO(new Bundle {
@@ -23,4 +24,12 @@ object Fir extends App {
     new Fir(4),
     firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info")
   )
+
+  val chirrtl = ChiselStage.emitCHIRRTL(
+    new Fir(4), args
+  )
+
+  val fileWriter = new PrintWriter("Fir.fir")
+  fileWriter.write(chirrtl)
+  fileWriter.close()
 }

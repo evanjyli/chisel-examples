@@ -1,9 +1,10 @@
-package gcd
+package queue
 
 import chisel3._
 import chisel3.util._
 import chisel3.util.Decoupled
 import _root_.circt.stage.ChiselStage
+import java.io.PrintWriter
 
 
 class MyBundle extends Bundle {
@@ -28,4 +29,11 @@ object MyQueue extends App {
       "-strip-debug-info",
       "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing")
   )
+
+  val chirrtl = ChiselStage.emitCHIRRTL(
+    new MyQueue(4)
+  )
+  val fileWriter = new PrintWriter("MyQueue.fir")
+  fileWriter.write(chirrtl)
+  fileWriter.close()
 }

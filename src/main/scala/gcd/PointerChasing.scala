@@ -1,8 +1,9 @@
-package gcd
+package pointerchasing
 
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
+import java.io.PrintWriter
 
 class SRAM(val depth: Int, val width: Int) extends Module {
   val addrWidth = log2Ceil(depth)
@@ -147,4 +148,12 @@ object PointerChasing extends App {
       "-disable-all-randomization",
       "-strip-debug-info",
       "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
+
+  val chirrtl = ChiselStage.emitCHIRRTL(
+    new PointerChasing, args
+  )
+
+  val fileWriter = new PrintWriter("PointerChasing.fir")
+  fileWriter.write(chirrtl)
+  fileWriter.close()
 }
