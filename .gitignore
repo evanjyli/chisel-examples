@@ -344,3 +344,6 @@ hs_err_pid*
 **.fir
 **.lut.blif
 .bloop
+
+.metals
+project
