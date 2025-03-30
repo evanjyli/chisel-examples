@@ -1,4 +1,4 @@
-package nestedwhen
+package example
 
 import chisel3._
 import chisel3.util.Decoupled
@@ -63,15 +63,4 @@ class NestedBundleModule extends Module {
 
   val reg = RegNext(io.h)
   io.g <> reg
-  
-}
-
-object NestedBundleModuleCHIRRTL extends App {
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new NestedBundleModule, args
-  )
-
-  val fileWriter = new PrintWriter("NestedBundleModule.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
 }

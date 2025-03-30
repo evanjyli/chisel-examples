@@ -1,4 +1,4 @@
-package reginit
+package example
 
 import chisel3._
 import chisel3.util._
@@ -33,28 +33,4 @@ class RegVecInit(length: Int) extends Module {
   }
 
   io.out := regfile(io.addr)
-}
-
-object TestRegInit extends App {
-  ChiselStage.emitSystemVerilogFile(
-    new TestRegInit(2),
-    firtoolOpts = Array("-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing")
-  )
-
-  ChiselStage.emitSystemVerilogFile(
-    new RegVecInit(2),
-    firtoolOpts = Array("-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing")
-  )
-
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new RegVecInit(2), args
-  )
-
-  val fileWriter = new PrintWriter("RegVecInit.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
 }

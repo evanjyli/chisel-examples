@@ -1,4 +1,4 @@
-package decoupledmux
+package example
 
 import chisel3._
 import chisel3.util._
@@ -25,21 +25,4 @@ class DecoupledMux extends Module {
   io.c.valid := io.a.valid || io.b.valid
   io.a.ready := io.c.ready
   io.b.ready := io.c.ready && !io.a.valid
-}
-
-
-object DecoupledMux extends App {
-  ChiselStage.emitSystemVerilogFile(
-    new DecoupledMux,
-    firtoolOpts = Array("-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing")
-  )
-
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new DecoupledMux
-  )
-  val fileWriter = new PrintWriter("DecoupledMux.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
 }

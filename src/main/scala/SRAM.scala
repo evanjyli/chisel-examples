@@ -1,10 +1,9 @@
-package sram
+package example
 
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
 import java.io.PrintWriter
-
 
 class OneReadOneWritePortSRAM(width: Int) extends Module {
   val io = IO(new Bundle {
@@ -69,46 +68,24 @@ class AggregateSRAM(width: Int) extends Module {
   io.rdata := mem.read(io.raddr, !io.wen)
 }
 
-object SRAM extends App {
-  ChiselStage.emitSystemVerilogFile(
-    new SinglePortSRAM(2),
-    firtoolOpts = Array(
-      "-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
+class DualReadSingleWritePortSRAM(width: Int) extends Module {
+  val io = IO(new Bundle {
+    val raddr_0 = Input(UInt(3.W))
+    val raddr_1 = Input(UInt(3.W))
+    val rdata_0 = Output(Vec(4, UInt(width.W)))
+    val rdata_1 = Output(Vec(4, UInt(width.W)))
 
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new SinglePortSRAM(2)
-  )
-  val fileWriter = new PrintWriter("SinglePortSRAM.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
+    val wen = Input(Bool())
+    val waddr = Input(UInt(3.W))
+    val wdata = Input(Vec(4, UInt(width.W)))
+    val wmask = Input(Vec(4, Bool()))
+  })
 
-  ChiselStage.emitSystemVerilogFile(
-    new OneReadOneWritePortSRAM(2),
-    firtoolOpts = Array(
-      "-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
+  val mem = SyncReadMem(8, Vec(4, UInt(width.W)))
+  when (io.wen) {
+    mem.write(io.waddr, io.wdata, io.wmask)
+  }
 
-  val chirrtl2 = ChiselStage.emitCHIRRTL(
-    new OneReadOneWritePortSRAM(2)
-  )
-  val fileWriter2 = new PrintWriter("OneReadOneWritePortSRAM.fir")
-  fileWriter2.write(chirrtl2)
-  fileWriter2.close()
-
-  ChiselStage.emitSystemVerilogFile(
-    new AggregateSRAM(2),
-    firtoolOpts = Array(
-      "-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
-
-  val chirrtl3 = ChiselStage.emitCHIRRTL(
-    new AggregateSRAM(2)
-  )
-  val fileWriter3 = new PrintWriter("AggregateSRAM.fir")
-  fileWriter3.write(chirrtl3)
-  fileWriter3.close()
+  io.rdata_0 := mem.read(io.raddr_0, !io.wen)
+  io.rdata_1 := mem.read(io.raddr_1, !io.wen)
 }

@@ -1,4 +1,4 @@
-package hierarchy
+package example
 
 import chisel3._
 import chisel3.util._
@@ -40,22 +40,3 @@ class Top extends Module {
   b.io.in := a.io.out
   io.out := b.io.out
 }
-
-
-object Hierarchy extends App {
-  ChiselStage.emitSystemVerilogFile(
-    new Top,
-    firtoolOpts = Array("-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing")
-  )
-
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new Top
-  )
-  val fileWriter = new PrintWriter("Hierarchy.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
-}
-
-

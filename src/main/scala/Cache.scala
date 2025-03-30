@@ -1,11 +1,11 @@
-package cache
+package example
 
 import chisel3._
 import chisel3.util._
 import _root_.circt.stage.ChiselStage
 import java.io.PrintWriter
 
-class SRAM(val depth: Int, val width: Int) extends Module {
+class DataMem(val depth: Int, val width: Int) extends Module {
   val addrWidth = log2Ceil(depth)
   val io = IO(new Bundle {
     // Write port
@@ -62,12 +62,12 @@ class Cache(
   val reqIndex = io.reqAddr(indexWidth+1, 2)
   val reqOffset = io.reqAddr(1, 0) // Not used in this simple cache
 
-  // Define cache SRAMs
+  // Define cache DataMems
   // Tag store: holds the tag for each cache line
   val tagMem = SyncReadMem(cacheSize, UInt(tagWidth.W))
 
   // Data store: holds the data for each cache line
-  val dataMem = Module(new SRAM(depth = cacheSize, width = dataWidth))
+  val dataMem = Module(new DataMem(depth = cacheSize, width = dataWidth))
 
   // State machine states
   val s_idle :: s_mem_read :: s_mem_write :: s_wait :: Nil = Enum(4)
@@ -145,23 +145,4 @@ class Cache(
       state := s_idle
     }
   }
-}
-
-object Cache extends App {
-  ChiselStage.emitSystemVerilogFile(
-    new Cache,
-    firtoolOpts = Array(
-      "-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing"))
-}
-
-object CacheCHIRRTL extends App {
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new Cache, args
-  )
-
-  val fileWriter = new PrintWriter("Cache.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
 }

@@ -347,3 +347,5 @@ hs_err_pid*
 
 .metals
 project
+generated/*.fir
+generated/*.sv

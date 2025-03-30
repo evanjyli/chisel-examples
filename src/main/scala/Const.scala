@@ -1,4 +1,4 @@
-package const
+package example
 
 import chisel3._
 import chisel3.util._
@@ -30,13 +30,4 @@ class Const(length: Int) extends Module {
   io.outAnd := RegNext(b)
   io.outOr  := RegNext(c)
   io.outXor := RegNext(d)
-}
-
-object Const extends App {
-  ChiselStage.emitSystemVerilogFile(
-    new Const(2),
-    firtoolOpts = Array("-disable-all-randomization",
-      "-strip-debug-info",
-      "--lowering-options=disallowLocalVariables,noAlwaysComb,verifLabels,disallowPortDeclSharing")
-  )
 }
