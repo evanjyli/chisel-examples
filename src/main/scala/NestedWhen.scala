@@ -24,18 +24,35 @@ class NestedWhen extends Module {
   }
 }
 
-object NestedWhen extends App {
-  val chirrtl = ChiselStage.emitCHIRRTL(
-    new NestedWhen, args
-  )
+class LastConnectSemantics extends Module {
+  val io = IO(new Bundle {
+    val a = Input(UInt(2.W))
+    val b = Input(UInt(2.W))
+    val c = Input(UInt(2.W))
+    val d = Input(UInt(2.W))
+    val sel = Input(UInt(2.W))
+    val output = Output(UInt(2.W))
+    val output_2 = Output(UInt(2.W))
+  })
 
-  val fileWriter = new PrintWriter("NestedWhen.fir")
-  fileWriter.write(chirrtl)
-  fileWriter.close()
+  io.output := DontCare
+
+  when (io.sel === 0.U) {
+    io.output := io.a
+  } .elsewhen (io.sel === 1.U) {
+    io.output := io.b
+  } .otherwise {
+    when (io.sel === 2.U) {
+      io.output := io.c
+    }
+    io.output := io.d
+  }
+
+  when (io.sel === 3.U) {
+    io.output_2 := io.a
+  }
+  io.output_2 := io.c
 }
-
-
-
 
 class W extends Bundle {
   val a = UInt(2.W)

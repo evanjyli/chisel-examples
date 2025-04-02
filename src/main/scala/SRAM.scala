@@ -89,3 +89,26 @@ class DualReadSingleWritePortSRAM(width: Int) extends Module {
   io.rdata_0 := mem.read(io.raddr_0, !io.wen)
   io.rdata_1 := mem.read(io.raddr_1, !io.wen)
 }
+
+class OneReadOneReadWritePortSRAM(width: Int) extends Module {
+  val io = IO(new Bundle {
+    val raddr_0 = Input(UInt(3.W))
+    val raddr_1 = Input(UInt(3.W))
+    val rdata_0 = Output(Vec(4, UInt(width.W)))
+    val rdata_1 = Output(Vec(4, UInt(width.W)))
+    val ren = Input(Bool())
+
+    val wen = Input(Bool())
+    val waddr = Input(UInt(3.W))
+    val wdata = Input(Vec(4, UInt(width.W)))
+    val wmask = Input(Vec(4, Bool()))
+  })
+
+  val mem = SyncReadMem(8, Vec(4, UInt(width.W)))
+  when (io.wen) {
+    mem.write(io.waddr, io.wdata, io.wmask)
+  }
+
+  io.rdata_0 := mem.read(io.raddr_0, !io.wen)
+  io.rdata_1 := mem.read(io.raddr_1, !io.wen && !io.ren)
+}

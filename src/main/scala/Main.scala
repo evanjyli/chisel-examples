@@ -38,6 +38,7 @@ object Main extends App {
   elaborate(new GCD, "GCD")
   elaborate(new Top, "Hierarchy")
   elaborate(new NestedWhen, "NestedWhen")
+  elaborate(new LastConnectSemantics, "LastConnectSemantics")
 // elaborate(new NestedBundleModule, "NestedBundleModule")
   elaborate(new PointerChasing, "PointerChasing")
   elaborate(new MyQueue(2), "MyQueue")
@@ -49,4 +50,5 @@ object Main extends App {
   elaborate(new OneReadOneWritePortSRAM(2), "OneReadOneWritePortSRAM")
   elaborate(new AggregateSRAM(2), "AggregateSRAM")
   elaborate(new DualReadSingleWritePortSRAM(2), "DualReadSingleWritePortSRAM")
+  elaborate(new OneReadOneReadWritePortSRAM(2), "OneReadOneReadWritePortSRAM")
 }
