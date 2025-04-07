@@ -34,3 +34,16 @@ class RegVecInit(length: Int) extends Module {
 
   io.out := regfile(io.addr)
 }
+
+class RegInitWire extends  Module {
+  val io = IO(new Bundle {
+    val a = Input(UInt(2.W))
+    val b = Output(UInt(2.W))
+  })
+
+  val wire_init = WireInit(0.U(2.W))
+  val init_reg = RegInit(wire_init)
+
+  init_reg := io.a
+  io.b := init_reg
+}

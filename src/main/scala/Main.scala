@@ -38,13 +38,27 @@ object Main extends App {
   elaborate(new GCD, "GCD")
   elaborate(new Top, "Hierarchy")
   elaborate(new NestedWhen, "NestedWhen")
-  elaborate(new LastConnectSemantics, "LastConnectSemantics")
+
+  elaborate(new LCS1, "LCS1")
+  elaborate(new LCS2, "LCS2")
+  elaborate(new LCS3, "LCS3")
+  elaborate(new LCS4, "LCS4")
+  elaborate(new LCS5, "LCS5")
+  elaborate(new LCS6, "LCS6")
+  elaborate(new LCS7, "LCS7")
+  elaborate(new LCS8, "LCS8")
+
+  elaborate(new BitSel1, "BitSel1")
+  elaborate(new BitSel2, "BitSel2")
+
 // elaborate(new NestedBundleModule, "NestedBundleModule")
   elaborate(new PointerChasing, "PointerChasing")
   elaborate(new MyQueue(2), "MyQueue")
   elaborate(new RegFile, "RegFile")
   elaborate(new TestRegInit(2), "RegInit")
   elaborate(new RegVecInit(2), "RegVecInit")
+
+  elaborate(new RegInitWire, "RegInitWire")
 
   elaborate(new SinglePortSRAM(2), "SinglePortSRAM")
   elaborate(new OneReadOneWritePortSRAM(2), "OneReadOneWritePortSRAM")
