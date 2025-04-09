@@ -256,3 +256,53 @@ class NestedBundleModule extends Module {
   val reg = RegNext(io.h)
   io.g <> reg
 }
+
+class WireRegInsideWhen extends Module {
+  val io = IO(new Bundle {
+    val a = Input(UInt(2.W))
+    val b = Input(UInt(2.W))
+    val out = Output(UInt(2.W))
+  })
+
+  when (io.a =/= io.b) {
+    val out = Wire(UInt(2.W))
+    out := io.a + io.b
+    val nxt = RegNext(out)
+    io.out := nxt
+  } .otherwise {
+    val out = Wire(UInt(2.W))
+    out := io.a - io.b
+    val nxt = RegInit(0.U(2.W))
+    when (io.b === 2.U) {
+      nxt := out
+    }
+    io.out := nxt
+  }
+}
+
+class MultiWhen extends Module {
+  val io = IO(new Bundle {
+    val update = Input(Bool())
+    val a = Input(UInt(3.W))
+    val b = Input(UInt(3.W))
+    val out = Output(UInt(3.W))
+    val out_2 = Output(UInt(3.W))
+  })
+
+  io.out   := DontCare
+  io.out_2 := DontCare
+
+  when (io.update) {
+    val out = Wire(UInt(3.W))
+    out := io.a + io.b
+    val nxt = RegNext(out)
+    io.out := nxt
+  }
+
+  when (io.update) {
+    val out = Wire(UInt(3.W))
+    out := io.a + io.b
+    val nxt = RegNext(out)
+    io.out_2 := nxt
+  }
+}

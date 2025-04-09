@@ -47,6 +47,8 @@ object Main extends App {
   elaborate(new LCS6, "LCS6")
   elaborate(new LCS7, "LCS7")
   elaborate(new LCS8, "LCS8")
+  elaborate(new WireRegInsideWhen, "WireRegInsideWhen")
+  elaborate(new MultiWhen, "MultiWhen")
 
   elaborate(new BitSel1, "BitSel1")
   elaborate(new BitSel2, "BitSel2")
