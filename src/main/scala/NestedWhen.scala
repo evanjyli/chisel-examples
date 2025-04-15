@@ -183,20 +183,28 @@ class LCS8 extends Module {
   io.output := DontCare
 
   when (io.sel === 0.U) {
+    io.output := io.b
     io.output := io.a
   } .elsewhen (io.sel === 1.U) {
+    io.output := io.a
     io.output := io.b
   } .otherwise {
     when (io.sel === 2.U) {
+      io.output := io.d
       io.output := io.c
     }
+    io.output := io.c
     io.output := io.d
   }
 
   when (io.sel === 3.U) {
+    io.output_2 := io.c
+    io.output_2 := io.d
+    io.output_2 := io.b
     io.output_2 := io.a
   }
   io.output_2 := io.c
+  io.output_2 := io.d
 }
 
 class LastConnectSemantics2 extends Module {
@@ -297,6 +305,8 @@ class MultiWhen extends Module {
     out := io.a + io.b
     val nxt = RegNext(out)
     io.out := nxt
+  } .otherwise {
+    io.out := io.a + io.b
   }
 
   when (io.update) {
@@ -304,5 +314,7 @@ class MultiWhen extends Module {
     out := io.a + io.b
     val nxt = RegNext(out)
     io.out_2 := nxt
+  } .otherwise {
+    io.out_2 := io.a - io.b
   }
 }
