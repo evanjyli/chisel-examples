@@ -28,6 +28,7 @@ object Main extends App {
   }
 
   elaborate(new Adder(2), "Adder")
+  elaborate(new Subtracter(2), "Subtracter")
   elaborate(new Const(2), "Const")
   elaborate(new Cache, "Cache")
 
@@ -36,6 +37,7 @@ object Main extends App {
 
   elaborate(new Fir(4), "Fir")
   elaborate(new GCD, "GCD")
+  elaborate(new GCDDelta, "GCDDelta")
   elaborate(new Top, "Hierarchy")
   elaborate(new NestedWhen, "NestedWhen")
 
@@ -67,4 +69,6 @@ object Main extends App {
   elaborate(new AggregateSRAM(2), "AggregateSRAM")
   elaborate(new DualReadSingleWritePortSRAM(2), "DualReadSingleWritePortSRAM")
   elaborate(new OneReadOneReadWritePortSRAM(2), "OneReadOneReadWritePortSRAM")
+  
+  elaborate(new CombHierarchy, "CombHierarchy")
 }

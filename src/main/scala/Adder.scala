@@ -15,3 +15,14 @@ class Adder(length: Int) extends Module {
   reg := io.a + io.b
   io.c := reg
 }
+
+class Subtracter(length: Int) extends Module {
+  val io = IO(new Bundle {
+    val a = Input(UInt(length.W))
+    val b = Input(UInt(length.W))
+    val c = Output(UInt(length.W))
+  })
+  val reg = Reg(UInt(length.W))
+  reg := io.a - io.b
+  io.c := reg
+}
