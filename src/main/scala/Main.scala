@@ -69,6 +69,14 @@ object Main extends App {
   elaborate(new AggregateSRAM(2), "AggregateSRAM")
   elaborate(new DualReadSingleWritePortSRAM(2), "DualReadSingleWritePortSRAM")
   elaborate(new OneReadOneReadWritePortSRAM(2), "OneReadOneReadWritePortSRAM")
-  
+
   elaborate(new CombHierarchy, "CombHierarchy")
+
+  elaborate(new HuffmanCompressorStep1, "HuffmanCompressorStep1")
+  elaborate(new HuffmanCompressorStep2, "HuffmanCompressorStep2")
+  elaborate(new HuffmanCompressorStep3, "HuffmanCompressorStep3")
+
+  elaborate(new AESStep1, "AESStep1")
+  elaborate(new AESStep2, "AESStep2")
+  elaborate(new AESStep3, "AESStep3")
 }
