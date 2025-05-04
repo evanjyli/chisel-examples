@@ -55,7 +55,6 @@ object Main extends App {
   elaborate(new BitSel1, "BitSel1")
   elaborate(new BitSel2, "BitSel2")
 
-// elaborate(new NestedBundleModule, "NestedBundleModule")
   elaborate(new PointerChasing, "PointerChasing")
   elaborate(new MyQueue(2), "MyQueue")
   elaborate(new RegFile, "RegFile")
@@ -71,10 +70,6 @@ object Main extends App {
   elaborate(new OneReadOneReadWritePortSRAM(2), "OneReadOneReadWritePortSRAM")
 
   elaborate(new CombHierarchy, "CombHierarchy")
-
-  elaborate(new HuffmanCompressorStep1, "HuffmanCompressorStep1")
-  elaborate(new HuffmanCompressorStep2, "HuffmanCompressorStep2")
-  elaborate(new HuffmanCompressorStep3, "HuffmanCompressorStep3")
 
   elaborate(new AESStep1, "AESStep1")
   elaborate(new AESStep2, "AESStep2")
