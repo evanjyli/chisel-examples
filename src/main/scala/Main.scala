@@ -74,4 +74,13 @@ object Main extends App {
   elaborate(new AESStep1, "AESStep1")
   elaborate(new AESStep2, "AESStep2")
   elaborate(new AESStep3, "AESStep3")
+
+  elaborate(new CordicStep1, "CordicStep1")
+  elaborate(new CordicStep2, "CordicStep2")
+  elaborate(new CordicStep3, "CordicStep3")
+
+  elaborate(new FFTStep1, "FFTStep1")
+  elaborate(new FFTStep2, "FFTStep2")
+  elaborate(new FFTStep3, "FFTStep3")
+  elaborate(new FFTStep4, "FFTStep4")
 }
