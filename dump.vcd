@@ -1,0 +1,148 @@
+$date
+	Thu May 22 23:56:24 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module Fir_tb $end
+$var wire 4 ! io_out [3:0] $end
+$var reg 1 " clock $end
+$var reg 4 # io_consts_0 [3:0] $end
+$var reg 4 $ io_consts_1 [3:0] $end
+$var reg 4 % io_consts_2 [3:0] $end
+$var reg 4 & io_consts_3 [3:0] $end
+$var reg 4 ' io_in [3:0] $end
+$var reg 1 ( io_valid $end
+$var reg 1 ) reset $end
+$scope module dut $end
+$var wire 1 " clock $end
+$var wire 4 * io_consts_0 [3:0] $end
+$var wire 4 + io_consts_1 [3:0] $end
+$var wire 4 , io_consts_2 [3:0] $end
+$var wire 4 - io_consts_3 [3:0] $end
+$var wire 4 . io_in [3:0] $end
+$var wire 1 ( io_valid $end
+$var wire 1 ) reset $end
+$var wire 4 / io_out [3:0] $end
+$var reg 4 0 taps_1 [3:0] $end
+$var reg 4 1 taps_2 [3:0] $end
+$var reg 4 2 taps_3 [3:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+bx 2
+bx 1
+bx 0
+bx /
+b0 .
+b100 -
+b11 ,
+b10 +
+b1 *
+1)
+0(
+b0 '
+b100 &
+b11 %
+b10 $
+b1 #
+0"
+bx !
+$end
+#5000
+b0 !
+b0 /
+b0 2
+b0 1
+b0 0
+1"
+#10000
+0"
+0)
+#15000
+b1 0
+b11 !
+b11 /
+b1 '
+b1 .
+1(
+1"
+#20000
+0"
+#25000
+b110 !
+b110 /
+b1 1
+1"
+#30000
+0"
+#35000
+b1010 !
+b1010 /
+b1 2
+1"
+#40000
+0"
+#45000
+1"
+#50000
+0"
+#55000
+1"
+#60000
+0"
+#65000
+1"
+#70000
+0"
+#75000
+1"
+#80000
+0"
+#85000
+1"
+#90000
+0"
+#95000
+1"
+#100000
+0"
+#105000
+1"
+#110000
+0"
+#115000
+b1001 !
+b1001 /
+b0 '
+b0 .
+0(
+1"
+#120000
+0"
+#125000
+1"
+#130000
+0"
+#135000
+1"
+#140000
+0"
+#145000
+1"
+#150000
+0"
+#155000
+1"
+#160000
+0"
+#165000
+1"
