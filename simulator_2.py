@@ -35,24 +35,50 @@ class DAG:
         # perform comb logic
         for node in result:
             parent_keys = self.get_parent_keys(self.adj_list, node)
+            if self.node_type[node] == "reg":
+                # if the reg has no input and only has init val
+                if len(parent_keys) == 0:
+                    self.values[node] = self.reg_init[node]
+                    node_out_val_updated[node] = self.reg_init[node]
+                    continue
 
-            # if the reg has no input and only has init val
-            if len(parent_keys) == 0 and self.node_type[node] == "reg":
-                self.values[node] = int(self.reg_init[node])
+                # if the reg has input and is initiallized to X
+                else:
+                    parent_val = node_out_val[parent_keys.pop()]
+                    self.values[node] = parent_val
+                    node_out_val_updated[node] = parent_val
+                    continue
+
+            if self.node_type[node] == 'output':
+                # Output just takes its input (could be 'X')
+                val = node_out_val[parent_keys.pop()]
+                self.values[node] = val
+                node_out_val_updated[node] = val
                 continue
-            # set final signal if reached out or reg node
-            if self.node_type[node] == 'output' or self.node_type[node] == "reg":
-                self.values[node] = int(node_out_val[parent_keys.pop()])
-            else: # comb logic calculate
-                val_a = int(node_out_val[parent_keys.pop()])
-                if self.op_type[node] == 'not':
-                    node_out_val_updated[node] = 0 if val_a == 1 else 1
-                if self.op_type[node] == 'and':
-                    val_b = int(node_out_val[parent_keys.pop()])
-                    node_out_val_updated[node] = val_a & val_b
-                if self.op_type[node] == 'or':
-                    val_b = int(node_out_val[parent_keys.pop()])
-                    node_out_val_updated[node] = val_a | val_b
+
+            # Combinational logic with X propagation
+            if self.node_type[node] == "comb":
+                op = self.op_type[node]
+                if op == 'not':
+                    val_a = node_out_val[parent_keys.pop()]
+                    if val_a == 'X':
+                        node_out_val_updated[node] = 'X'
+                    else:
+                        node_out_val_updated[node] = 0 if int(val_a) == 1 else 1
+                elif op == 'and':
+                    val_a = node_out_val[parent_keys.pop()]
+                    val_b = node_out_val[parent_keys.pop()]
+                    if val_a == 'X' or val_b == 'X':
+                        node_out_val_updated[node] = 'X'
+                    else:
+                        node_out_val_updated[node] = int(val_a) & int(val_b)
+                elif op == 'or':
+                    val_a = node_out_val[parent_keys.pop()]
+                    val_b = node_out_val[parent_keys.pop()]
+                    if val_a == 'X' or val_b == 'X':
+                        node_out_val_updated[node] = 'X'
+                    else:
+                        node_out_val_updated[node] = int(val_a) | int(val_b)
         return node_out_val_updated
     
     def get_parent_keys(self, a_dict, target_node):
@@ -86,8 +112,15 @@ class DAG:
             # init regs and input signals
             if current_level == 0:
                 if self.node_type[current] == "reg":
-                    node_out_val[current] = self.reg_init[current]
-                if self.node_type[current] == "input":
+                    # Check if the register has a connected input
+                    parents = [parent for parent in self.adj_list if current in self.adj_list[parent]]
+                    if parents and self.node_type[parents[0]] == "input":
+                        parent = parents[0]  # Assume single input
+                        # Use input value if available, else fallback to reg_init
+                        node_out_val[current] = self.sig_val[parent]
+                    else:
+                        node_out_val[current] = self.reg_init[current]
+                elif self.node_type[current] == "input":
                     node_out_val[current] = self.sig_val[current]
 
             # mark path of current as walked
@@ -102,7 +135,6 @@ class DAG:
             # level is full, perform logic
             if len(node_in_level) == 0:
                 node_in_level = queue.copy()
-                self.record_out(node_out_val)
                 node_out_val = self.record_out(node_out_val)
         
         return levels
@@ -122,11 +154,12 @@ class DAG:
 def create_example_circuit():
     circuit = DAG()
     
-    circuit.add_node("R1", "reg", reg_init="1")
+    circuit.add_node("R1", "reg", reg_init="X")
     circuit.add_node("R2", "reg", reg_init="1")
     circuit.add_node("R3", "reg", reg_init="1")
     
-    circuit.add_node("in", "input", sig_val="1")
+    circuit.add_node("in1", "input", sig_val="1")
+    circuit.add_node("in2", "input", sig_val="1")
     circuit.add_node("out", "output")
     
     circuit.add_node("A", "comb", op_type="and")
@@ -135,8 +168,9 @@ def create_example_circuit():
     circuit.add_node("D", "comb", op_type="not")
     circuit.add_node("E", "comb", op_type="not")
     
+    circuit.add_edge("in1", "R1")
     circuit.add_edge("R1", "A")
-    circuit.add_edge("in", "A")
+    circuit.add_edge("in2", "A")
     circuit.add_edge("R2", "B")
     circuit.add_edge("A", "B")
     circuit.add_edge("B", "C")
@@ -220,8 +254,8 @@ def create_random_circuit(
     
     return circuit
 
-circuit = create_random_circuit()
-# circuit = create_example_circuit()
+# circuit = create_random_circuit()
+circuit = create_example_circuit()
 circuit.display()
 
 print("\nLevelization:")
