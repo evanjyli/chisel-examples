@@ -50,13 +50,13 @@ class DAG:
                     continue
 
             if self.node_type[node] == 'output':
-                # Output just takes its input (could be 'X')
+                # output just takes its input (could be 'X')
                 val = node_out_val[parent_keys.pop()]
                 self.values[node] = val
                 node_out_val_updated[node] = val
                 continue
 
-            # Combinational logic with X propagation
+            # combinational logic with X propagation
             if self.node_type[node] == "comb":
                 op = self.op_type[node]
                 if op == 'not':
@@ -75,8 +75,12 @@ class DAG:
                 elif op == 'or':
                     val_a = node_out_val[parent_keys.pop()]
                     val_b = node_out_val[parent_keys.pop()]
-                    if val_a == 'X' or val_b == 'X':
+                    if val_a == 'X' and val_b == 'X':
                         node_out_val_updated[node] = 'X'
+                    elif val_a == 'X':
+                        node_out_val_updated[node] = int(val_b)
+                    elif val_b == 'X':
+                        node_out_val_updated[node] = int(val_a)
                     else:
                         node_out_val_updated[node] = int(val_a) | int(val_b)
         return node_out_val_updated
@@ -112,11 +116,10 @@ class DAG:
             # init regs and input signals
             if current_level == 0:
                 if self.node_type[current] == "reg":
-                    # Check if the register has a connected input
+                    # check if the register has a connected input
                     parents = [parent for parent in self.adj_list if current in self.adj_list[parent]]
                     if parents and self.node_type[parents[0]] == "input":
-                        parent = parents[0]  # Assume single input
-                        # Use input value if available, else fallback to reg_init
+                        parent = parents[0]  # TODO: Assume single input
                         node_out_val[current] = self.sig_val[parent]
                     else:
                         node_out_val[current] = self.reg_init[current]
