@@ -10,10 +10,11 @@ class DAG:
         self.values = {} # simulated values for outs and regs
 
         # SRAM-specific storage
-        self.sram_memory = {}          # maps sram node -> list of depth elements
-        self.sram_read_countdown = {}  # maps sram node -> countdown until read data available
+        self.sram_memory = {}          # maps sram node -> list of elements
+        self.sram_read_latency = {}    # maps sram node -> read latency
+        self.sram_rdaddr_buffer = {}   # maps sram node -> read address buffer. list is read latency long
         self.sram_read_addr = {}       # maps sram node -> address for pending read
-        self.sram_write_addr = {}       # maps sram node -> address for pending read
+        self.sram_write_addr = {}      # maps sram node -> address for pending write
 
     def add_node(self, 
                  node, 
@@ -22,7 +23,8 @@ class DAG:
                  op_type=None, 
                  sig_val=None, 
                  sram_memory=['X', 'X', 'X', 'X'],
-                 sram_read_countdown='3',
+                 sram_read_latency="3",
+                #  sram_rdaddr_buffer=["1", None, None],
                  sram_read_addr=None,
                  sram_write_addr=None
                  ):
@@ -37,7 +39,9 @@ class DAG:
         if node_type == "sram":
             # initialize all sram memory to X
             self.sram_memory[node] = sram_memory
-            self.sram_read_countdown[node] = int(sram_read_countdown)
+            self.sram_read_latency[node] = sram_read_latency
+            # self.sram_rdaddr_buffer[node] = sram_rdaddr_buffer
+            self.sram_rdaddr_buffer[node] = [None] * int(sram_read_latency)
             self.sram_read_addr[node] = sram_read_addr
             self.sram_write_addr[node] = sram_write_addr
 
@@ -47,9 +51,12 @@ class DAG:
     def record_out(self, node_out_val):
         result = []
         node_out_val_updated = node_out_val.copy()
+
+        # select nodes whose parents have been walked, except for reg and sram
         for key in self.adj_list:
+            node_type = self.node_type[key]
             # skip keys already in b
-            if key in node_out_val and self.node_type[key] != 'reg':
+            if key in node_out_val and node_type != 'reg' and node_type != 'sram':
                 continue
             # find all parent keys that reference this key
             parents = [parent for parent in self.adj_list if key in self.adj_list[parent]]
@@ -66,21 +73,18 @@ class DAG:
                 if len(parent_keys) == 0:
                     self.values[node] = self.reg_init[node]
                     node_out_val_updated[node] = self.reg_init[node]
-                    continue
 
                 # if the reg has input and is initiallized to X
                 else:
                     parent_val = node_out_val[parent_keys.pop()]
                     self.values[node] = parent_val
                     node_out_val_updated[node] = parent_val
-                    continue
 
             elif node_type == 'output':
                 # output just takes its input (could be 'X')
                 val = node_out_val[parent_keys.pop()]
                 self.values[node] = val
                 node_out_val_updated[node] = val
-                continue
 
             # combinational logic with X propagation
             elif node_type == "comb":
@@ -111,9 +115,13 @@ class DAG:
                         node_out_val_updated[node] = int(val_a) | int(val_b)
 
             elif node_type == "sram":
-                # write to sram in 1 cycle
-                write_addr = int(self.sram_write_addr[node])
-                self.sram_memory[node][write_addr] = node_out_val[parent_keys.pop()]
+                # # write to sram in 1 cycle
+                # write_addr = int(self.sram_write_addr[node])
+                # self.sram_memory[node][write_addr] = node_out_val[parent_keys.pop()]
+                if len(parent_keys) != 0:
+                    # dont need to update node_out_val_updated
+                    write_addr = int(self.sram_write_addr[node])
+                    self.sram_memory[node][write_addr] = node_out_val[parent_keys.pop()]
 
         return node_out_val_updated
     
@@ -135,25 +143,10 @@ class DAG:
         # set regs, inputs, and srams that are ready to read to level 0
         for node in self.adj_list:
             node_type = self.node_type[node]
-            if node_type == "reg" or node_type == "input":
+            if node_type == "reg" or node_type == "input" or node_type == "sram":
                 levels[node] = 0
                 queue.append(node)
                 node_in_level.append(node)
-            elif node_type == "sram":
-                # for SRAM, only consider level 0 if read countdown == 0 and no write
-                if self.sram_read_countdown[node] == 0 and not self.sram_write_addr[node]:
-                    levels[node] = 0
-                    queue.append(node)
-                    node_in_level.append(node)
-
-        # if no regs or inputs or srams that are ready to read, 
-        # assign level 0 to sram that's not ready to read
-        if not queue:
-            for node in self.adj_list:
-                if(self.node_type[node] == "sram"):
-                    levels[node] = 0
-                    queue.append(node)
-                    node_in_level.append(node)
         
         # assign levels for rest of nodes
         while queue:
@@ -164,7 +157,10 @@ class DAG:
 
             # init regs and input signals
             if current_level == 0:
-                if node_type == "reg":
+                if node_type == "input":
+                    node_out_val[current] = self.sig_val[current]
+                elif node_type == "reg":
+                    #TODO: add support for sram connection and read latency = 0 support
                     # check if the register has a connected input
                     parents = self.get_parent_keys(self.adj_list, current)
                     if parents and self.node_type[parents[0]] == "input":
@@ -172,30 +168,20 @@ class DAG:
                         node_out_val[current] = self.sig_val[parent]
                     else:
                         node_out_val[current] = self.reg_init[current]
-                elif node_type == "input":
-                    node_out_val[current] = self.sig_val[current]
                 elif node_type == "sram":
+                    #TODO: add read latency = 0 support
+                    # read from sram
+                    current_addr = self.sram_rdaddr_buffer[current].pop(0)
+                    if current_addr is None:
+                        node_out_val[current] = 'X'
+                    else:
+                        node_out_val[current] = self.sram_memory[current][int(current_addr)]
+
+                    # update the read address buffer
                     if self.sram_read_addr[current]:
-                        read_addr = int(self.sram_read_addr[current])
-
-                        # if there is both a read and write, update the sram memory first
-                        # update the sram when an input or reg is loading it
-                        parents = self.get_parent_keys(self.adj_list, current)
-                        if self.sram_write_addr[current] and parents:
-                            parent = parents[0]  # TODO: Assume single input
-                            write_addr = int(self.sram_write_addr[current])
-                            if self.node_type[parents[0]] == "input":
-                                self.sram_memory[current][write_addr] = self.sig_val[parent]
-                            elif self.node_type[parents[0]] == "reg":
-                                self.sram_memory[current][write_addr] = self.reg_init[parent]
-
-            # if there is sram read
-            if node_type == "sram" and self.sram_read_addr[current]:
-                read_addr = int(self.sram_read_addr[current])
-                if self.sram_read_countdown[current] == 0 :
-                    node_out_val[current] = self.sram_memory[current][read_addr]
-                else:
-                    node_out_val[current] = 'X'
+                        self.sram_rdaddr_buffer[current].append(self.sram_read_addr[current])
+                    else:
+                        self.sram_rdaddr_buffer[current].append(None)
 
             # mark path of current as walked
             for neighbor in self.adj_list[current]:
@@ -224,7 +210,7 @@ class DAG:
             elif self.node_type[node] == "input":
                 node_info += f", sig_val={self.sig_val[node]}"
             elif self.node_type[node] == "sram":
-                node_info += f"(SRAM, latency={self.sram_read_countdown[node]})"
+                node_info += f"(SRAM, latency={self.sram_read_latency[node]})"
             print(f"{node} ({node_info}): -> {neighbors}")
 
 def create_example_circuit():
@@ -262,14 +248,14 @@ def create_example_circuit():
 def create_sram_circuit():
     dag = DAG()
     
-    # Read only
-    dag.add_node("sram1", "sram", 
-                 sram_memory=['1', '2', '3', '4'],
-                 sram_read_countdown="1", 
-                 sram_read_addr="3",
-                 )
-    dag.add_node("out_data", "output")
-    dag.add_edge("sram1", "out_data")
+    # # Read only
+    # dag.add_node("sram1", "sram", 
+    #              sram_memory=['1', '2', '3', '4'],
+    #              sram_read_latency="3",
+    #              sram_read_addr="2",
+    #              )
+    # dag.add_node("out_data", "output")
+    # dag.add_edge("sram1", "out_data")
 
     # # Write only
     # dag.add_node("sram1", "sram", 
@@ -282,9 +268,9 @@ def create_sram_circuit():
     # # Read and write with same/diff addr
     # dag.add_node("sram1", "sram", 
     #              sram_memory=['1', '2', '3', '4'],
-    #              sram_read_countdown="1",
+    #              sram_read_latency="3",
     #              sram_read_addr="3",
-    #              sram_write_addr="3",
+    #              sram_write_addr="2",
     #              )
     # dag.add_node("in1", "input", sig_val="5")
     # dag.add_node("out1", "output")
@@ -294,8 +280,8 @@ def create_sram_circuit():
     # # comb logic going into write / loop
     # dag.add_node("sram1", "sram", 
     #              sram_memory=['X', '1', 'X', 'X'],
-    #              sram_read_countdown="1",
-    #              sram_read_addr="2",
+    #              sram_read_latency="3",
+    #              sram_read_addr="1",
     #              sram_write_addr="2",
     #              )
     # dag.add_node("in1", "input", sig_val="1")
@@ -308,6 +294,22 @@ def create_sram_circuit():
     # dag.add_edge("sram1", "B")
     # dag.add_edge("B", "R1")
 
+    # comb logic going out or read / loop
+    dag.add_node("sram1", "sram", 
+                 sram_memory=['X', '1', 'X', 'X'],
+                 sram_read_latency="3",
+                 sram_read_addr="2",
+                 sram_write_addr="2",
+                 )
+    dag.add_node("in1", "input", sig_val="1")
+    dag.add_node("A", "comb", op_type="and")
+    dag.add_node("B", "comb", op_type="not")
+    dag.add_node("R1", "reg", reg_init="0")
+    dag.add_edge("B", "sram1")
+    dag.add_edge("R1", "B")
+    dag.add_edge("sram1", "A")
+    dag.add_edge("in1", "A")
+    dag.add_edge("A", "R1")
 
     return dag
 
@@ -396,3 +398,6 @@ print(circuit.values)
 
 print("\nSRAM Memory:")
 print(circuit.sram_memory)
+
+print("\nSRAM Address Buffer:")
+print(circuit.sram_rdaddr_buffer)
