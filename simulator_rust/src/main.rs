@@ -35,24 +35,6 @@ impl fmt::Display for Value {
     }
 }
 
-impl Value {
-    pub fn from_str(s: &str) -> Self {
-        match s {
-            "X" => Value::X,
-            "0" => Value::Bit(0),
-            "1" => Value::Bit(1),
-            _ => Value::X,
-        }
-    }
-
-    pub fn to_int(&self) -> Option<u8> {
-        match self {
-            Value::Bit(b) => Some(*b),
-            Value::X => None,
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct RtlNode {
     pub name: String,
@@ -61,7 +43,6 @@ pub struct RtlNode {
     pub op_type: Option<OpType>,
     pub sig_val: Option<Value>,
     
-    // SRAM-specific fields
     pub sram_memory: Option<Vec<Value>>,
     pub sram_read_latency: Option<usize>,
     pub sram_rdaddr_buffer: Option<Vec<Option<usize>>>,
@@ -481,7 +462,6 @@ impl RtlSimulator {
     }
 }
 
-// Example usage and test functions
 pub fn create_example_circuit() -> RtlSimulator {
     let mut circuit = RtlSimulator::new();
     
